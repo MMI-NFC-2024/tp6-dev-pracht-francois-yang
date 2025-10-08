@@ -3,19 +3,82 @@ import PlotFigure from "../components/PlotFigure.astro";
 import Layout from "../layouts/Layout.astro";
 import * as Plot from "@observablehq/plot";
 import penguins from "../assets/penguins.json";
+
+const speciesList = [
+  ...new Set(penguins.map((penguin) => penguin.species).filter(Boolean)),
+];
+const penguinSlides = speciesList.map((species) => {
+  const records = penguins.filter((penguin) => penguin.species === species);
+  const valid = records.filter(
+    (penguin) => penguin.culmen_length_mm && penguin.culmen_depth_mm,
+  );
+  return { species, records: valid, count: valid.length };
+});
 ---
 
 <Layout>
-  <h1 class="text-2xl">Test Astro et Plot (Observablehq)</h1>
-  <PlotFigure
-    options={{
-      marks: [
-        Plot.dot(penguins, {
-          x: "culmen_length_mm",
-          y: "culmen_depth_mm",
-          stroke: "species",
-        }),
-      ],
-    }}
-  />
+  <div
+    class="min-h-screen bg-gradient-to-b from-blue-950 via-blue-900 to-blue-950 text-blue-100"
+  >
+    <div class="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-12">
+      <header
+        class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+      >
+        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">
+          TP N°6 - Visualisation de données avec Plotly
+        </h1>
+      </header>
+      <section class="space-y-6">
+        <div class="space-y-2">
+          <p class="text-sm uppercase tracking-[0.3em] text-blue-300/70">
+            Palmer Penguins
+          </p>
+          <h2 class="text-3xl font-semibold">Morphologie des manchots</h2>
+        </div>
+        <div
+          class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-blue-950/60 backdrop-blur"
+        >
+          <div
+            class="flex gap-6 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory"
+          >
+            {
+                penguinSlides.map(({ species, records, count }) => (
+                <article class="flex w-full flex-none snap-center flex-col gap-4 rounded-2xl bg-blue-900/60 p-6 shadow-lg shadow-blue-950/40 ring-1 ring-white/10 backdrop-blur md:min-w-[28rem]">
+                  <div class="flex items-start justify-between">
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300/80">
+                    Espèce
+                    </p>
+                    <h3 class="text-2xl font-semibold">{species}</h3>
+                  </div>
+                  <span class="rounded-full bg-blue-400/10 px-3 py-1 text-xs font-medium text-blue-300/90">
+                    {count} individus
+                  </span>
+                  </div>
+                  <PlotFigure
+                  options={{
+                    marks: [
+                    Plot.dot(records, {
+                      x: "culmen_length_mm",
+                      y: "culmen_depth_mm",
+                      stroke: "sex",
+                      fill: "sex",
+                      fillOpacity: 0.8,
+                    }),
+                    ],
+                    width: 480,
+                    height: 360,
+                    x: { label: "Longueur du bec (mm)" },
+                    y: { label: "Profondeur du bec (mm)" },
+                    color: { legend: true, scheme: "set2" }, // Couleurs vives
+                  }}
+                  />
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
 </Layout>
