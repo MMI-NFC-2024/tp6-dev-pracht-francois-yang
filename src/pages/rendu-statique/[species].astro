@@ -1,0 +1,78 @@
+---
+import PlotFigure from "../../components/PlotFigure.astro";
+import Layout from "../../layouts/Layout.astro";
+import * as Plot from "@observablehq/plot";
+import penguins from "../../assets/penguins.json";
+
+export function getStaticPaths() {
+  const speciesList = [
+    ...new Set(penguins.map((penguin) => penguin.species).filter(Boolean)),
+  ];
+  return speciesList.map((species) => {
+    const key = species.toLowerCase();
+    const records = penguins.filter(
+      (penguin) => penguin.species?.toLowerCase() === key,
+    );
+    return {
+      params: { species: key },
+      props: { species, records },
+    };
+  });
+}
+
+const { species, records } = Astro.props;
+const validRecords = records.filter(
+  (penguin) => penguin.culmen_length_mm && penguin.culmen_depth_mm,
+);
+---
+
+<Layout>
+  <div
+    class="min-h-screen bg-gradient-to-b from-blue-950 via-blue-900 to-blue-950 text-blue-100"
+  >
+    <div class="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-16">
+      <header class="space-y-3">
+        <h1 class="text-4xl font-semibold tracking-tight">{species}</h1>
+        <p class="text-sm text-slate-300 sm:text-base">
+          Visualisation des mesures morphologiques des manchots de l'espèce{" "}
+          <strong>{species}</strong>.
+        </p>
+      </header>
+      {
+        (
+          <div class="border border-blue-400 rounded-lg p-3 bg-blue-950/60 mb-6 w-fit">
+            <a
+              href="/rendu-dynamique"
+              class="text-sm font-semibold text-white transition hover:text-blue-200 block"
+            >
+              Retour
+            </a>
+          </div>
+        )
+      }
+      <PlotFigure
+        options={{
+          marks: [
+            Plot.dot(validRecords, {
+              x: "culmen_length_mm",
+              y: "culmen_depth_mm",
+              stroke: "sex",
+            }),
+          ],
+          width: 640,
+          height: 420,
+          x: {
+            label: "Longueur du bec (mm)",
+          },
+          y: {
+            label: "Profondeur du bec (mm)",
+          },
+          color: {
+            legend: true,
+            scheme: "set2",
+          },
+        }}
+      />
+    </div>
+  </div>
+</Layout>

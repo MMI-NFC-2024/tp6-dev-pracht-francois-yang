@@ -1,0 +1,70 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import penguins from "../../assets/penguins.json";
+
+const speciesList = [
+  ...new Set(penguins.map((penguin) => penguin.species).filter(Boolean)),
+];
+const linkspenguin = speciesList.map((species) => ({
+  label: species,
+  href: `/rendu-statique/${species.toLowerCase()}`,
+  description: "Voir la page statique",
+
+}));
+
+const sections = [
+  {
+    title: "Manchots",
+    items: linkspenguin,
+  }
+];
+---
+
+<Layout>
+  <div class="min-h-screen bg-blue-950 text-blue-100">
+    <div class="mx-auto flex max-w-4xl flex-col gap-12 px-6 py-16">
+      <header class="space-y-3">
+        <p
+          class="text-sm font-semibold uppercase"
+        >
+          Page statique
+        </p>
+        <h1 class="text-4xl font-semibold tracking-tight">
+          Sélectionner une donnée statique
+        </h1>
+      </header>
+      {
+        sections.map(({ title, items }) => (
+          <section class="space-y-4">
+            <div class="space-y-2">
+              <h2 class="text-2xl font-semibold">{title}</h2>
+            </div>
+            <ul class="grid gap-10 sm:grid-cols-3">
+              {items.map(
+                ({
+                  label,
+                  href,
+                  description,
+                }) => (
+                  <li>
+                    <a
+                      href={href}
+                      class={`group block rounded-2xl border border-white/10 bg-blue-900/60 p-6 shadow-lg shadow-blue-950/40 transition hover:border-blue-300/60 hover:bg-blue-900/80`}
+                    >
+                      <span class="mt-3 block text-2xl font-semibold group-hover:text-blue-50">
+                        {label}
+                      </span>
+                      <span class="mt-2 block text-sm text-blue-400 group-hover:text-blue-200">
+                        {description}
+                      </span>
+                    </a>
+                  </li>
+                )
+              )}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Layout>
